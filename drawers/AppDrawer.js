@@ -63,7 +63,7 @@ const AppDrawer = observer(({ children, permanent = false }) => {
     <>
       {!isXsScreen && (
         <Drawer
-          open={showDrawer}
+          open={true}
           variant="persistent"
           anchor="left"
           sx={{
