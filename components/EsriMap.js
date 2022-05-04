@@ -43,7 +43,7 @@ const getCountryFill = (score) => {
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 const EsriMap = () => {
-  const { data, error } = useSWR(
+  const { data } = useSWR(
     "https://services7.arcgis.com/IyvyFk20mB7Wpc95/arcgis/rest/services/SDR_2021_Dataset/FeatureServer/0/query?where=1%3D1&outFields=id,sdgi_s&outSR=4326&f=json",
     fetcher
   );
@@ -75,7 +75,7 @@ const EsriMap = () => {
       basemap: "streets-vector", // Basemap layer service
     });
 
-    const view = new MapView({
+    new MapView({
       map: map,
       center: [7.419778610764139, 48.250093856735575], // Longitude, latitude
       zoom: 3, // Zoom level
