@@ -19,6 +19,7 @@ const MapTooltip = observer(() => {
       sx={{
         position: "absolute",
         zIndex: 1000,
+        pointerEvents: "none",
       }}
       // modifiers={[
       //   {

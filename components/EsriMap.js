@@ -116,10 +116,11 @@ const EsriMap = observer(() => {
         if (response.results.length) {
           const graphic = response.results[0];
           // do something with the graphic
-          console.log(event);
-
           mapStore.showTooltip({
-            event,
+            event: {
+              x: event.x,
+              y: event.y + event.native.target.getBoundingClientRect().top,
+            },
             country: graphic.graphic.attributes.admin,
           });
         } else {
