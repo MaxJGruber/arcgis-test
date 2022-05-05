@@ -1,5 +1,7 @@
 import { loadModules } from "esri-loader";
 import useSWR from "swr";
+import { observer } from "mobx-react-lite";
+import { useMapStore } from "stores/mapStore";
 
 const LEGEND = [
   {
@@ -42,7 +44,8 @@ const getCountryFill = (score) => {
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
-const EsriMap = () => {
+const EsriMap = observer(() => {
+  const mapStore = useMapStore();
   const { data } = useSWR(
     "https://services7.arcgis.com/IyvyFk20mB7Wpc95/arcgis/rest/services/SDR_2021_Dataset/FeatureServer/0/query?where=1%3D1&outFields=id,sdgi_s&outSR=4326&f=json",
     fetcher
@@ -60,8 +63,6 @@ const EsriMap = () => {
     },
   }));
 
-  console.log(dataWithColor);
-
   loadModules([
     "esri/config",
     "esri/Map",
@@ -75,7 +76,7 @@ const EsriMap = () => {
       basemap: "streets-vector", // Basemap layer service
     });
 
-    new MapView({
+    const view = new MapView({
       map: map,
       center: [7.419778610764139, 48.250093856735575], // Longitude, latitude
       zoom: 3, // Zoom level
@@ -97,20 +98,33 @@ const EsriMap = () => {
       uniqueValueInfos: dataWithColor,
     };
 
-    // const popup = {
-    //   title: "POPUP",
-    //   content: "<h1>THIS IS A POPUP</h1>",
-    // };
-
-    // create new geojson layer using the blob url
     const layer = new GeoJSONLayer({
       url: "/static/world.json",
       outFields: ["*"],
       renderer: colorRenderer,
       opacity: 0.7,
     });
-
     map.add(layer);
+
+    view.on("pointer-move", (event) => {
+      // only include graphics from hurricanesLayer in the hitTest
+      const opts = {
+        include: layer,
+      };
+      view.hitTest(event, opts).then((response) => {
+        // check if a feature is returned from the hurricanesLayer
+        if (response.results.length) {
+          const graphic = response.results[0];
+          // do something with the graphic
+          console.log(graphic);
+
+          mapStore.showTooltip({
+            event,
+            country: graphic.graphic.attributes.admin,
+          });
+        }
+      });
+    });
   });
 
   return (
@@ -119,6 +133,6 @@ const EsriMap = () => {
       id="viewDiv"
     ></div>
   );
-};
+});
 
 export default EsriMap;
